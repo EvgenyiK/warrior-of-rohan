@@ -3,12 +3,12 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
-
-	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -19,9 +19,26 @@ type PageData struct {
 	Content string
 }
 
+func init() {
+	// loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
+
 func main() {
-	// Подключение к базе данных PostgreSQL
-	connStr := os.Getenv("POSTGRES_CONN")
+
+	host := "localhost"
+	port := 5432
+	user := os.Getenv("PGUSER")
+	password := os.Getenv("PGPASS")
+	dbname := os.Getenv("PGDB")
+
+	// Формируем строку подключения
+	connStr := fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+
 	var err error
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {

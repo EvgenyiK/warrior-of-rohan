@@ -1,3 +1,5 @@
 .idea
 docker-compose.yml
 Dockerfile
+/.air.toml
+/.env
