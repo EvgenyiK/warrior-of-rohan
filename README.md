@@ -2,5 +2,5 @@
 
 
 <p align="center">
- <img width="200px" src="img/r.webp" alt="qr"/>
+ <img width="200px" src="assets/img/r.webp" alt="qr"/>
 </p>

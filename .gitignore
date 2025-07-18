@@ -2,4 +2,4 @@
 docker-compose.yml
 Dockerfile
 /.air.toml
-/.env
+/internal/config/.env
