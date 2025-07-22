@@ -1,59 +1,72 @@
 package game
 
 import (
+	"log"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"image"
-	_ "image/png"
-	"log"
 )
 
 const (
-	screenWidth  = 320
-	screenHeight = 240
-	frameOX      = 0
-	frameOY      = 32
-	frameWidth   = 32
-	frameHeight  = 32
-	frameCount   = 8
+	screenWidth  = 800
+	screenHeight = 600
 )
 
 var (
-	runnerImage *ebiten.Image
+	playerImage *ebiten.Image
+	playerX     float64 = screenWidth / 2
+	playerY     float64 = screenHeight / 2
+	speed       float64 = 4
 )
 
-type Game struct {
-	count int
-}
-
-func (g *Game) Update() error {
-	g.count++
-	return nil
-}
-
-func loadImage() {
+func init() {
 	var err error
 	// Используем ebitenutil.NewImageFromFile для загрузки изображения
-	runnerImage, _, err = ebitenutil.NewImageFromFile("assets/img/thorfinn.png")
+	playerImage, _, err = ebitenutil.NewImageFromFile("assets/img/thorfinn.png")
 	if err != nil {
 		log.Fatal("Ошибка загрузки изображения:", err)
 	}
+}
 
-	/*img, _, err := image.Decode(file)
-	if err != nil {
-		log.Fatal(err)
+type Game struct{}
+
+func (g *Game) Update() error {
+	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
+		playerY -= speed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
+		playerY += speed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
+		playerX -= speed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
+		playerX += speed
 	}
 
-	runnerImage = ebiten.NewImageFromImage(img)*/
+	// Ограничения по границам экрана
+	if playerX < 0 {
+		playerX = 0
+	}
+	if playerY < 0 {
+		playerY = 0
+	}
+	maxX := float64(screenWidth - playerImage.Bounds().Dx())
+	maxY := float64(screenHeight - playerImage.Bounds().Dy())
+	if playerX > maxX {
+		playerX = maxX
+	}
+	if playerY > maxY {
+		playerY = maxY
+	}
+
+	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-float64(frameWidth)/2, -float64(frameHeight)/2)
-	op.GeoM.Translate(screenWidth/2, screenHeight/2)
-	i := (g.count / 5) % frameCount
-	sx, sy := frameOX+i*frameWidth, frameOY
-	screen.DrawImage(runnerImage.SubImage(image.Rect(sx, sy, sx+frameWidth, sy+frameHeight)).(*ebiten.Image), op)
+	op.GeoM.Translate(playerX, playerY)
+	screen.DrawImage(playerImage, op)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -61,16 +74,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func RunEbiten() {
-	//img, _, err := image.Decode(bytes.NewReader(images.Runner_png))
-	//if err != nil {
-	//log.Fatal(err)
-	//}
-	//runnerImage = ebiten.NewImageFromImage(img)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowTitle("Simple Ebiten Game")
 
-	loadImage()
-
-	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
-	ebiten.SetWindowTitle("RohanWarrior")
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
 	}
