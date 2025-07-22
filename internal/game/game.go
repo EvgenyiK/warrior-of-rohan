@@ -2,10 +2,10 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"image"
 	_ "image/png"
 	"log"
-	"os"
 )
 
 const (
@@ -32,18 +32,19 @@ func (g *Game) Update() error {
 }
 
 func loadImage() {
-	file, err := os.Open("assets/img/thorfinn.png")
+	var err error
+	// Используем ebitenutil.NewImageFromFile для загрузки изображения
+	runnerImage, _, err = ebitenutil.NewImageFromFile("assets/img/thorfinn.png")
+	if err != nil {
+		log.Fatal("Ошибка загрузки изображения:", err)
+	}
+
+	/*img, _, err := image.Decode(file)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
 
-	img, _, err := image.Decode(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	runnerImage = ebiten.NewImageFromImage(img)
+	runnerImage = ebiten.NewImageFromImage(img)*/
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
