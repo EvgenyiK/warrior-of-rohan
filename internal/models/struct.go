@@ -1,7 +1,10 @@
 package models
 
-// Структура для передачи данных в шаблон
-type PageData struct {
-	Title   string
-	Content string
+import "sync"
+
+type GameStateStruct struct {
+	MU   sync.Mutex
+	Data string
 }
+
+var GameState = &GameStateStruct{}

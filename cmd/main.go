@@ -11,11 +11,13 @@ import (
 func main() {
 	var wg sync.WaitGroup
 
+	dataChan := make(chan string, 10)
+
 	// Запуск веб-сервера
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		http.HandleFunc("/", handlers.HandleGame)
+		http.HandleFunc("/", handlers.HandleGame(dataChan))
 		log.Println("Starting web server at :8080")
 		log.Fatal(http.ListenAndServe(":8080", nil))
 	}()
@@ -24,7 +26,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		game.RunEbiten()
+		game.RunEbiten(dataChan)
 	}()
 
 	wg.Wait()
