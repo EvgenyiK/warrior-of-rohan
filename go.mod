@@ -8,7 +8,11 @@ require (
 	golang.org/x/image v0.20.0
 )
 
-require golang.org/x/text v0.18.0 // indirect
+require (
+	github.com/ebitengine/oto/v3 v3.3.3 // indirect
+	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
+	golang.org/x/text v0.18.0 // indirect
+)
 
 require (
 	github.com/ebitengine/gomobile v0.0.0-20240911145611-4856209ac325 // indirect

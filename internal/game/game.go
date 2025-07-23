@@ -1,8 +1,13 @@
 package game
 
 import (
+	"bytes"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3" // или wav, если у вас другой формат
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
+	"os"
+
 	"image/color"
 	_ "image/jpeg" // для декодирования JPEG
 	_ "image/png"  // для PNG
@@ -29,6 +34,8 @@ const (
 var (
 	playerImage            *ebiten.Image
 	backgroundImage        *ebiten.Image
+	audioContext           *audio.Context
+	player                 *audio.Player
 	fontFace               font.Face
 	backgrounds            []*ebiten.Image
 	currentText            string
@@ -40,6 +47,8 @@ var (
 
 func init() {
 	var err error
+
+	loadBackgrounds()
 
 	rand.Seed(time.Now().UnixNano())
 	backgroundImage = ebiten.NewImage(screenWidth, screenHeight)
@@ -68,6 +77,37 @@ func init() {
 		log.Fatal(err)
 	}
 
+	//Музыка
+	// Инициализация аудио контекста
+	audioContext = audio.NewContext(44100)
+
+	// Загрузка файла музыки (например, mp3)
+	f, err := ioutil.ReadFile("assets/music/ridersofrohan.mp3")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stream, err := mp3.Decode(audioContext, bytes.NewReader(f))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	player, err = audio.NewPlayer(audioContext, stream)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for {
+			if !player.IsPlaying() {
+				player.Rewind()
+				player.Play()
+			}
+			time.Sleep(time.Second) // проверка раз в секунду
+		}
+	}()
+
+	player.Play()
 }
 
 func fillBackgroundWithColor(img *ebiten.Image, c color.Color) {
@@ -75,18 +115,16 @@ func fillBackgroundWithColor(img *ebiten.Image, c color.Color) {
 }
 
 func loadBackgrounds() {
-	// Путь к папке с изображениями
 	folderPath := "assets/backgrounds"
 
 	// Получаем список файлов в папке
-	files, err := ioutil.ReadDir(folderPath)
+	files, err := os.ReadDir(folderPath)
 	if err != nil {
 		log.Println("Ошибка чтения папки:", err)
 		return
 	}
 
 	for _, file := range files {
-		// Проверяем, что это файл и что он имеет расширение png или jpg
 		if file.IsDir() {
 			continue
 		}
@@ -95,10 +133,9 @@ func loadBackgrounds() {
 			continue
 		}
 
-		// Полный путь к файлу
 		path := filepath.Join(folderPath, file.Name())
+		log.Println("Пытаемся загрузить:", path)
 
-		// Загружаем изображение из файла
 		img, _, err := ebitenutil.NewImageFromFile(path)
 		if err != nil {
 			log.Println("Ошибка загрузки файла", path, ":", err)
@@ -137,7 +174,6 @@ func (g *Game) Update() error {
 			A: 255,
 		}*/
 		//fillBackgroundWithColor(backgroundImage, newColor)
-		loadBackgrounds()
 
 		// Обновляем текст (например, показываем координаты)
 		models.GameState.MU.Lock()
