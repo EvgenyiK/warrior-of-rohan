@@ -1,5 +1,0 @@
-CREATE TABLE IF NOT EXISTS game_state (
-  id SERIAL PRIMARY KEY,
-  state TEXT,
-  updated_at TIMESTAMP DEFAULT NOW()
-);
